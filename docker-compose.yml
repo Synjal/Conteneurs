@@ -1,0 +1,76 @@
+services:
+  postgres_db:
+    image: postgres:latest
+    container_name: postgres_db
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    restart: unless-stopped
+
+  customers:
+    build: ./customers
+    container_name: customers_service
+    environment:
+      DB_HOST: postgres_db
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3001:3001"
+    volumes:
+      - customers_logs:/app/logs
+    depends_on:
+      - postgres_db
+    networks:
+      - backend
+
+  orders:
+    build: ./orders
+    container_name: orders_service
+    environment:
+      DB_HOST: postgres_db
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3002:3002"
+    volumes:
+      - orders_logs:/app/logs
+    depends_on:
+      - postgres_db
+    networks:
+      - backend
+
+  products:
+    build: ./products
+    container_name: products_service
+    environment:
+      DB_HOST: postgres_db
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3003:3003"
+    volumes:
+      - products_logs:/app/logs
+    depends_on:
+      - postgres_db
+    networks:
+      - backend
+
+volumes:
+  postgres_data:
+  customers_logs:
+  orders_logs:
+  products_logs:
+
+networks:
+  backend:
+    driver: bridge
