@@ -12,7 +12,7 @@ const IS_PRODUCT_IN_STOCK = 'isProductInStock';
 const DECREASE_STOCK = 'DecreaseStock';
 
 @Controller('product')
-export class ProductController {
+export class ProductsController {
     constructor(
         private readonly ProductService: ProductsService
     ) {}
