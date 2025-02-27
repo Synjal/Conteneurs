@@ -9,6 +9,9 @@ export class Order {
     productId: string
 
     @Column()
+    customerId: string
+
+    @Column()
     statusId: number
 
     @Column('int')

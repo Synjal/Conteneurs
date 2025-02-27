@@ -14,6 +14,21 @@ services:
       - backend
     restart: unless-stopped
 
+  postgres_db-test:
+    image: postgres:latest
+    container_name: postgres_db-test
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-test_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    restart: unless-stopped
+
   reverse-proxy:
     image: nginx:latest
     container_name: reverse-proxy
@@ -26,7 +41,6 @@ services:
       - products
       - orders
       - customers
-    restart: unless-stopped
 
   customers:
     build: ./customers
@@ -81,6 +95,7 @@ services:
 
 volumes:
   postgres_data:
+  postgres-test_data:
   customers_logs:
   orders_logs:
   products_logs:

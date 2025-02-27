@@ -11,7 +11,7 @@ export class CustomerController {
     ) {}
 
     @MessagePattern(GET_CUSTOMER)
-    async handleGetCustomer(@Payload() data: { customerId: string }) {
+    async handleGetCustomer(@Payload() data: { customerId: number }) {
         const { customerId } = data;
         return await this.customerService.getCustomer(customerId);
     }

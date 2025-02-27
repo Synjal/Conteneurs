@@ -5,11 +5,15 @@ import { CustomerModule } from './customer/customer.module';
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Customer } from "./customer/customer.entity";
+import { join } from 'path';
 
 @Module({
   imports: [
       ConfigModule.forRoot({
         isGlobal: true,
+        envFilePath: process.env.NODE_ENV === 'prod'
+          ? join(__dirname, '../../.env.prod')
+          : join(__dirname, '../../.env.test'),
       }),
       TypeOrmModule.forRoot({
         type: 'postgres',

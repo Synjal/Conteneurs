@@ -11,15 +11,15 @@ import {
 import { OrderService } from './order.service';
 import { ClientProxy } from '@nestjs/microservices';
 import axios from "axios";
-import { Observable } from 'rxjs';
-import {CreateOrderDto} from "./order.dto";
+import { firstValueFrom } from 'rxjs';
+import {CreateOrderDto} from "./order.dtos";
 
 const GET_CUSTOMER = 'getCustomer';
-const GET_BOOK = 'getBook';
-const IS_BOOK_IN_STOCK = 'isBookInStock';
+const GET_PRODUCT = 'getProduct';
+const IS_PRODUCT_IN_STOCK = 'isProductInStock';
 const DECREASE_STOCK = 'DecreaseStock';
 
-@Controller('order')
+@Controller('orders')
 export class OrderController {
     constructor(
         private readonly orderService: OrderService,
@@ -32,24 +32,22 @@ export class OrderController {
     async createOrder(@Body() createOrderDto: CreateOrderDto) {
         const {productId, customerId, quantity} = createOrderDto;
 
-        let customer: Observable<any>, product: Observable<any>;
+        let customer, product;
         try {
-            customer = this.customerClient
-                .send(GET_CUSTOMER, {customerId})
-            product = this.productClient.send(GET_BOOK, {productId});
+            customer = await firstValueFrom(this.customerClient.send(GET_CUSTOMER, { customerId }));
+            product = await firstValueFrom(this.productClient.send(GET_PRODUCT, { productId }));
         } catch (error) {
             throw new ServiceUnavailableException(
-                'Service unavailable, please try again later',
+              'Service unavailable, please try again later',
             );
         }
 
         if (!customer) throw new NotFoundException('Customer not found');
-        if (!product) throw new NotFoundException('Book not found');
+        if (!product) throw new NotFoundException('Product not found');
 
-        const isProductInStock = this.productClient
-            .send(IS_BOOK_IN_STOCK, {productId, quantity});
+        const isProductInStock = await firstValueFrom(this.productClient.send(IS_PRODUCT_IN_STOCK, { productId, quantity }));
         if (!isProductInStock)
-            throw new BadRequestException('Not enough books in stock');
+            throw new BadRequestException('Not enough products in stock');
 
         const order = await this.orderService.createOrder(createOrderDto);
         this.productClient.emit(DECREASE_STOCK, { productId, quantity });
