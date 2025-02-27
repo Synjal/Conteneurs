@@ -22,15 +22,15 @@ jobs:
 
       - name: Build and push customers image
         run: |
-          docker build -t ${{ secrets.DH_USER }}/customers:latest ./customers
-          docker push ${{ secrets.DH_USER }}/customers:latest
+          docker build -t ${{ secrets.DH_USERNAME }}/customers:latest ./customers
+          docker push ${{ secrets.DH_USERNAME }}/customers:latest
 
       - name: Build and push orders image
         run: |
-          docker build -t ${{ secrets.DH_USER }}/orders:latest ./orders
-          docker push ${{ secrets.DH_USER }}/orders:latest
+          docker build -t ${{ secrets.DH_USERNAME }}/orders:latest ./orders
+          docker push ${{ secrets.DH_USERNAME }}/orders:latest
 
       - name: Build and push products image
         run: |
-          docker build -t ${{ secrets.DH_USER }}/products:latest ./products
-          docker push ${{ secrets.DH_USER }}/products:latest
+          docker build -t ${{ secrets.DH_USERNAME }}/products:latest ./products
+          docker push ${{ secrets.DH_USERNAME }}/products:latest
