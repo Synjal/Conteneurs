@@ -1,52 +1,79 @@
-name: Docker Build & Push
+name: Build & Push Docker Images
 
 on:
   push:
     branches:
       - master
 
-jobs:
-  push_to_dockerhub:
-    name: Push Docker images
-    runs-on: ubuntu-latest
+env:
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+  TEAMS_WEBHOOK: ${{ secrets.TEAMS_WEBHOOK }}
 
+jobs:
+  # 1️⃣ Customers
+  build-customers:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: 🛎️ Checkout code
         uses: actions/checkout@v3
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DH_USERNAME }}
-          password: ${{ secrets.DH_KEY }}
-
-      - name: Build and push customers image
+      - name: 🔐 Docker Login
         run: |
-          docker build -t ${{ secrets.DH_USERNAME }}/customers:latest ./customers
-          docker push ${{ secrets.DH_USERNAME }}/customers:latest
+          echo "${{ env.DOCKERHUB_PASSWORD }}" | docker login -u "${{ env.DOCKERHUB_USERNAME }}" --password-stdin
 
-      - name: Build and push orders image
+      - name: 📦 Build & Push Customers
         run: |
-          docker build -t ${{ secrets.DH_USERNAME }}/orders:latest ./orders
-          docker push ${{ secrets.DH_USERNAME }}/orders:latest
+          docker build -t ${{ env.DOCKERHUB_USERNAME }}/customers:latest ./customers
+          docker push ${{ env.DOCKERHUB_USERNAME }}/customers:latest
 
-      - name: Build and push products image
+  # 2️⃣ Orders
+  build-orders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛎️ Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🔐 Docker Login
         run: |
-          docker build -t ${{ secrets.DH_USERNAME }}/products:latest ./products
-          docker push ${{ secrets.DH_USERNAME }}/products:latest
+          echo "${{ env.DOCKERHUB_PASSWORD }}" | docker login -u "${{ env.DOCKERHUB_USERNAME }}" --password-stdin
 
-      - name: 🟢 Envoyer une alerte Teams
-        if: success()
+      - name: 📦 Build & Push Orders
+        run: |
+          docker build -t ${{ env.DOCKERHUB_USERNAME }}/orders:latest ./orders
+          docker push ${{ env.DOCKERHUB_USERNAME }}/orders:latest
+
+  # 3️⃣ Products
+  build-products:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛎️ Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🔐 Docker Login
+        run: |
+          echo "${{ env.DOCKERHUB_PASSWORD }}" | docker login -u "${{ env.DOCKERHUB_USERNAME }}" --password-stdin
+
+      - name: 📦 Build & Push Products
+        run: |
+          docker build -t ${{ env.DOCKERHUB_USERNAME }}/products:latest ./products
+          docker push ${{ env.DOCKERHUB_USERNAME }}/products:latest
+
+  # ✅ 4️⃣ Notification Teams
+  notify-teams:
+    runs-on: ubuntu-latest
+    needs: [build-customers, build-orders, build-products]
+    if: success()
+
+    steps:
+      - name: 📣 Envoyer notification Teams
         run: |
           curl -H "Content-Type: application/json" \
                -d '{
-                    "@type": "MessageCard",
-                    "@context": "http://schema.org/extensions",
-                    "summary": "Nouveau déploiement",
-                    "themeColor": "00FF00",
-                    "title": "🎉 Nouveau Déploiement Réussi",
-                    "text": "Les images Docker des microservices ont été publiées avec succès 🚀"
-                   }' \
-               "${{ secrets.TEAMS_WEBHOOK }}"
-
-
+                 "@type": "MessageCard",
+                 "@context": "http://schema.org/extensions",
+                 "summary": "Déploiement réussi",
+                 "title": "🚀 Nouveau déploiement terminé",
+                 "text": "Les images Docker des microservices (Customers, Orders, Products) sont prêtes sur Docker Hub."
+               }' \
+               "${{ env.TEAMS_WEBHOOK }}"
