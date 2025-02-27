@@ -34,3 +34,14 @@ jobs:
         run: |
           docker build -t ${{ secrets.DH_USERNAME }}/products:latest ./products
           docker push ${{ secrets.DH_USERNAME }}/products:latest
+
+      - name: 🟢 Envoyer une alerte Teams
+        if: success()
+        run: |
+          curl -H "Content-Type: application/json" \
+               -d '{
+                    "title": "🎉 Nouveau Déploiement Réussi",
+                    "text": "Les images Docker des microservices ont été publiées avec succès 🚀"
+                   }' \
+               "${{ secrets.TEAMS_WEBHOOK }}"
+
