@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity()
+@Entity('orders')
 export class Order {
     @PrimaryGeneratedColumn('uuid')
     id: string
@@ -9,17 +9,11 @@ export class Order {
     productId: string
 
     @Column()
-    customerId: number
-
-    @Column()
     statusId: number
 
-    @Column()
+    @Column('int')
     quantity: number
 
-    @Column()
+    @Column('decimal')
     totalPrice: number
-
-    @Column()
-    billingMethod: string
 }

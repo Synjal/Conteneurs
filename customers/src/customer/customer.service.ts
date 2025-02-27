@@ -10,7 +10,7 @@ export class CustomerService {
         private readonly customerRepository: Repository<Customer>,
     ) {}
 
-    async getCustomer(customerId: string): Promise<Customer | null> {
+    async getCustomer(customerId: number): Promise<Customer | null> {
         return await this.customerRepository.findOne({
             where: {id: customerId},
         });

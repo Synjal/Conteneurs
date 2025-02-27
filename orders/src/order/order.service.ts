@@ -12,26 +12,8 @@ export class OrderService {
     ) {}
 
     async createOrder(createOrderDto: CreateOrderDto) {
-        const { productId, customerId, quantity, totalPrice } = createOrderDto;
-
-        const order = createOrderDto.id
-            ? this.orderRepository.create({
-                id: createOrderDto.id,
-                productId,
-                customerId,
-                quantity,
-                totalPrice,
-            })
-            : this.orderRepository.create({
-                productId,
-                customerId,
-                quantity,
-                totalPrice,
-            });
-
-        await this.orderRepository.save(order);
-
-        return order;
+        const order = this.orderRepository.create(createOrderDto);
+        return this.orderRepository.save(order);
     }
 
     async getOrder(orderId: string): Promise<Order> {
@@ -39,7 +21,7 @@ export class OrderService {
             where: { id: orderId },
         });
         if (!order) {
-            throw new NotFoundException('Order not found');
+            throw new NotFoundException('Order ${orderId} not found');
         }
         return order;
     }
