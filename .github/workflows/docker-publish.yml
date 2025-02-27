@@ -40,8 +40,13 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
                -d '{
+                    "@type": "MessageCard",
+                    "@context": "http://schema.org/extensions",
+                    "summary": "Nouveau déploiement",
+                    "themeColor": "00FF00",
                     "title": "🎉 Nouveau Déploiement Réussi",
                     "text": "Les images Docker des microservices ont été publiées avec succès 🚀"
                    }' \
                "${{ secrets.TEAMS_WEBHOOK }}"
+
 
